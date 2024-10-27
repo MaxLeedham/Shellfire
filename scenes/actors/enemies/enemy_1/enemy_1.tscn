@@ -1,0 +1,169 @@
+[gd_scene load_steps=16 format=3 uid="uid://dov0kefrn3lmx"]
+
+[ext_resource type="Script" path="res://scenes/actors/enemies/enemy_1/enemy_1.gd" id="1_5ifkx"]
+[ext_resource type="Texture2D" uid="uid://dd8yo4ai5u0hu" path="res://assets/enemy_1.png" id="2_k505x"]
+[ext_resource type="PackedScene" uid="uid://hf8wnw80eobb" path="res://scenes/components/hurtbox.tscn" id="3_3yr3d"]
+[ext_resource type="PackedScene" uid="uid://ejwptfur5epe" path="res://scenes/components/health.tscn" id="3_w4aws"]
+[ext_resource type="Script" path="res://addons/godot_state_charts/state_chart.gd" id="4_melmj"]
+[ext_resource type="PackedScene" uid="uid://b3sb1iiq26mnu" path="res://scenes/components/hitbox.tscn" id="4_x2cod"]
+[ext_resource type="Script" path="res://addons/godot_state_charts/compound_state.gd" id="5_yf4cm"]
+[ext_resource type="Script" path="res://addons/godot_state_charts/atomic_state.gd" id="6_43pln"]
+[ext_resource type="Script" path="res://addons/godot_state_charts/transition.gd" id="7_5qpwq"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_5aur0"]
+radius = 13.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_nf3ng"]
+radius = 25.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_jyc88"]
+radius = 8.0
+height = 26.0
+
+[sub_resource type="Animation" id="Animation_8c2du"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Hurtbox:monitoring")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+
+[sub_resource type="Animation" id="Animation_hh4cn"]
+resource_name = "attack"
+length = 0.15
+step = 0.01
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Hurtbox:monitoring")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.15),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, true, false]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_bhgg7"]
+_data = {
+"RESET": SubResource("Animation_8c2du"),
+"attack": SubResource("Animation_hh4cn")
+}
+
+[node name="Enemy1" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("1_5ifkx")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+texture_filter = 1
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("2_k505x")
+offset = Vector2(0, -8)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -13)
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_5aur0")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+unique_name_in_owner = true
+target_desired_distance = 30.0
+avoidance_enabled = true
+radius = 13.0
+
+[node name="Health" parent="." instance=ExtResource("3_w4aws")]
+max_health = 2
+
+[node name="Hitbox" parent="." node_paths=PackedStringArray("health") instance=ExtResource("4_x2cod")]
+position = Vector2(0, -13)
+collision_layer = 2
+immunity_time = 0.1
+health = NodePath("../Health")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+rotation = 1.5708
+shape = SubResource("CircleShape2D_nf3ng")
+
+[node name="Hurtbox" parent="." instance=ExtResource("3_3yr3d")]
+unique_name_in_owner = true
+position = Vector2(0, -13)
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+position = Vector2(16, 0)
+shape = SubResource("CapsuleShape2D_jyc88")
+
+[node name="Cooldown" type="Timer" parent="."]
+unique_name_in_owner = true
+wait_time = 0.5
+one_shot = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+"": SubResource("AnimationLibrary_bhgg7")
+}
+
+[node name="StateChart" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("4_melmj")
+
+[node name="Root" type="Node" parent="StateChart"]
+script = ExtResource("5_yf4cm")
+initial_state = NodePath("Idling")
+
+[node name="Idling" type="Node" parent="StateChart/Root"]
+script = ExtResource("6_43pln")
+
+[node name="OnTargetSpotted" type="Node" parent="StateChart/Root/Idling"]
+script = ExtResource("7_5qpwq")
+to = NodePath("../../Aggro")
+event = &"target_spotted"
+delay_in_seconds = "0.0"
+
+[node name="Aggro" type="Node" parent="StateChart/Root"]
+script = ExtResource("5_yf4cm")
+initial_state = NodePath("Chasing")
+
+[node name="Chasing" type="Node" parent="StateChart/Root/Aggro"]
+script = ExtResource("6_43pln")
+
+[node name="OnAttack" type="Node" parent="StateChart/Root/Aggro/Chasing"]
+script = ExtResource("7_5qpwq")
+to = NodePath("../../Attacking")
+event = &"attack"
+delay_in_seconds = "0.0"
+
+[node name="Attacking" type="Node" parent="StateChart/Root/Aggro"]
+script = ExtResource("6_43pln")
+
+[node name="OnAttackFinished" type="Node" parent="StateChart/Root/Aggro/Attacking"]
+script = ExtResource("7_5qpwq")
+to = NodePath("../../Chasing")
+event = &"attack_finished"
+delay_in_seconds = "0.0"
+
+[node name="OnTargetLost" type="Node" parent="StateChart/Root/Aggro"]
+script = ExtResource("7_5qpwq")
+to = NodePath("../../Idling")
+event = &"target_lost"
+delay_in_seconds = "0.0"
+
+[connection signal="velocity_computed" from="NavigationAgent2D" to="." method="_on_nav_agent_velocity_computed"]
+[connection signal="depleated" from="Health" to="." method="_on_health_depleated"]
+[connection signal="hit" from="Hitbox" to="." method="_on_hitbox_hit"]
+[connection signal="state_physics_processing" from="StateChart/Root/Idling" to="." method="_on_idling_state_physics_processing"]
+[connection signal="state_physics_processing" from="StateChart/Root/Aggro" to="." method="_on_aggro_state_physics_processing"]
+[connection signal="state_exited" from="StateChart/Root/Aggro/Chasing" to="." method="_on_chasing_state_exited"]
+[connection signal="state_physics_processing" from="StateChart/Root/Aggro/Chasing" to="." method="_on_chasing_state_physics_processing"]
+[connection signal="state_entered" from="StateChart/Root/Aggro/Attacking" to="." method="_on_attacking_state_entered"]

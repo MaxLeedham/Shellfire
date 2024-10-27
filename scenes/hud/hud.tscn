@@ -1,0 +1,63 @@
+[gd_scene load_steps=8 format=3 uid="uid://c61t5h0oaeg00"]
+
+[ext_resource type="Script" path="res://scenes/hud/hud.gd" id="1_ry0eb"]
+[ext_resource type="Texture2D" uid="uid://71t2ktdam50i" path="res://assets/bar.png" id="1_v4rcn"]
+[ext_resource type="Texture2D" uid="uid://dt3plhdvjlguq" path="res://assets/health.png" id="2_w3r83"]
+[ext_resource type="FontFile" uid="uid://bqobnng4jd5ai" path="res://assets/FiraCode-SemiBold.ttf" id="4_fftqs"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bbmbk"]
+atlas = ExtResource("1_v4rcn")
+region = Rect2(0, 8, 32, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0yady"]
+atlas = ExtResource("2_w3r83")
+region = Rect2(1, 10, 30, 12)
+
+[sub_resource type="LabelSettings" id="LabelSettings_cid78"]
+font = ExtResource("4_fftqs")
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_ry0eb")
+
+[node name="HealthBar" type="Node2D" parent="."]
+position = Vector2(20, 355)
+scale = Vector2(3, 3)
+
+[node name="Container" type="Sprite2D" parent="HealthBar"]
+texture_filter = 1
+texture = SubResource("AtlasTexture_bbmbk")
+offset = Vector2(16, -8)
+
+[node name="HealthBar" type="Sprite2D" parent="HealthBar/Container"]
+unique_name_in_owner = true
+position = Vector2(1, -2)
+texture = SubResource("AtlasTexture_0yady")
+offset = Vector2(15, -6)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_vertical = 6
+
+[node name="HintLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer"]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 2
+size_flags_vertical = 10
+text = "???"
+label_settings = SubResource("LabelSettings_cid78")
+horizontal_alignment = 1

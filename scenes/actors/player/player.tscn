@@ -1,0 +1,51 @@
+[gd_scene load_steps=8 format=3 uid="uid://m1vq6rbmexfq"]
+
+[ext_resource type="Script" path="res://scenes/actors/player/player_actor.gd" id="1_e3cs6"]
+[ext_resource type="PackedScene" uid="uid://bwlhejsxygqs3" path="res://scenes/actors/player/bullet/bullet.tscn" id="2_ewvv4"]
+[ext_resource type="Texture2D" uid="uid://bgwa14la2yaed" path="res://assets/player.png" id="3_fqsni"]
+[ext_resource type="PackedScene" uid="uid://b3sb1iiq26mnu" path="res://scenes/components/hitbox.tscn" id="4_uji24"]
+[ext_resource type="Texture2D" uid="uid://c1v8uxk6oje0" path="res://assets/arrow2.png" id="5_7tb7d"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_tm28g"]
+radius = 15.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ty0t5"]
+
+[node name="Player" type="CharacterBody2D"]
+collision_layer = 4
+script = ExtResource("1_e3cs6")
+bullet_scene = ExtResource("2_ewvv4")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+texture_filter = 1
+position = Vector2(0, -14)
+texture = ExtResource("3_fqsni")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -14)
+shape = SubResource("CircleShape2D_tm28g")
+
+[node name="Hitbox" parent="." instance=ExtResource("4_uji24")]
+position = Vector2(0, -14)
+collision_layer = 4
+immunity_time = 1.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("CircleShape2D_ty0t5")
+
+[node name="BulletPivot" type="Node2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(0, -14)
+
+[node name="BulletSpawn" type="Marker2D" parent="BulletPivot"]
+unique_name_in_owner = true
+position = Vector2(0, 25)
+
+[node name="Sprite2D" type="Sprite2D" parent="BulletPivot/BulletSpawn"]
+modulate = Color(0.929688, 0.443508, 0.0145264, 1)
+texture_filter = 1
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("5_7tb7d")
+
+[connection signal="hit" from="Hitbox" to="." method="_on_hitbox_hit"]

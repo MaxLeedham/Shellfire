@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3 uid="uid://bwlhejsxygqs3"]
+
+[ext_resource type="Script" path="res://scenes/actors/player/bullet/bullet.gd" id="1_pu784"]
+[ext_resource type="Texture2D" uid="uid://b6tk5lt2otr83" path="res://assets/bullet.png" id="2_kr18o"]
+[ext_resource type="PackedScene" uid="uid://hf8wnw80eobb" path="res://scenes/components/hurtbox.tscn" id="3_680i6"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_fdgah"]
+radius = 5.5
+
+[node name="Bullet" type="Node2D"]
+script = ExtResource("1_pu784")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_kr18o")
+offset = Vector2(1.5, -3.5)
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+autostart = true
+
+[node name="Hurtbox" parent="." instance=ExtResource("3_680i6")]
+collision_mask = 2
+monitoring = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("CircleShape2D_fdgah")
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
+[connection signal="hit" from="Hurtbox" to="." method="_on_hurtbox_hit"]

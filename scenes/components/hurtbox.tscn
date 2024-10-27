@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://hf8wnw80eobb"]
+
+[ext_resource type="Script" path="res://scenes/components/hurtbox.gd" id="1_tgav5"]
+
+[node name="Hurtbox" type="Area2D"]
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+script = ExtResource("1_tgav5")
+
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]
